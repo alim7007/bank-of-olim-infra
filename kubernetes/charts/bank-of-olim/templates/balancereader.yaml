@@ -63,6 +63,11 @@ spec:
             - secretRef:
                 name: {{ .Values.secrets.ledgerDb }}
 
+          volumeMounts:
+            - name: publickey
+              mountPath: /tmp/.ssh
+              readOnly: true
+
           startupProbe:
             httpGet:
               path: /healthy
@@ -89,6 +94,14 @@ spec:
 
           resources:
             {{- toYaml .Values.balancereader.resources | nindent 12 }}
+
+      volumes:
+        - name: publickey
+          secret:
+            secretName: {{ .Values.secrets.jwt }}
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
 
 ---
 apiVersion: v1
