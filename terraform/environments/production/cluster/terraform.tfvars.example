@@ -1,0 +1,22 @@
+region = "fra1"
+
+vpc_name = "bank-of-olim-production-vpc"
+
+
+admin_cidrs = [
+  "YOUR_PUBLIC_IP/32"
+]
+
+node_pools = {
+  control_plane = {
+    role  = "control-plane"
+    count = 1
+    size  = "s-2vcpu-4gb"
+  }
+
+  general = {
+    role  = "worker"
+    count = 2
+    size  = "s-2vcpu-4gb"
+  }
+}
