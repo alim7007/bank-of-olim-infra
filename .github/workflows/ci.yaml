@@ -1,0 +1,73 @@
+name: Infrastructure CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.0"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive terraform
+
+  helm:
+    name: Helm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Bank of Olim chart
+        run: |
+          helm lint kubernetes/charts/bank-of-olim
+
+      - name: Render production chart
+        run: |
+          helm template bank-of-olim \
+            kubernetes/charts/bank-of-olim \
+            -f kubernetes/environments/production/apps/bank-of-olim/values.yaml \
+            > /dev/null
+
+  ansible:
+    name: Ansible
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with Kubespray
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "ansible-core~=2.18"
+
+          ansible-galaxy collection install kubernetes.core
+
+      - name: Ansible syntax check
+        working-directory: ansible
+        run: |
+          ansible-playbook playbooks/site.yaml --syntax-check
