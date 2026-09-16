@@ -51,12 +51,11 @@ ledgerDb:
     tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
 
 ingress:
-  enabled: false
-
-  host: REPLACE_ME_DOMAIN
+  enabled: true
+  host: bank.local
 
   tls:
-    enabled: true
+    enabled: false
     clusterIssuer: letsencrypt-production
 
 storage:
