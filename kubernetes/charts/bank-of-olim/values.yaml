@@ -3,6 +3,8 @@ global:
   imagePullPolicy: IfNotPresent
   serviceAccountName: bank-of-olim
 
+  imagePullSecrets: []
+  
 config:
   localRoutingNum: "883745000"
   enableTracing: "false"

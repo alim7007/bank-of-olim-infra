@@ -1,6 +1,9 @@
 global:
   environment: production
 
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+    
 config:
   enableTracing: "false"
   enableMetrics: "true"
