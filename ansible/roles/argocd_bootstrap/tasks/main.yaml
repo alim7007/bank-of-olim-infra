@@ -19,6 +19,34 @@
     timeout: 10m0s
     state: present
 
+- name: Check Argo CD repository token
+  ansible.builtin.assert:
+    that:
+      - lookup('ansible.builtin.env', 'ARGOCD_REPO_TOKEN') | length > 0
+    fail_msg: "ARGOCD_REPO_TOKEN environment variable is not set"
+  no_log: true
+
+- name: Configure Argo CD private Git repository
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ argocd_kubeconfig }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: bank-of-olim-infra-repository
+        namespace: "{{ argocd_namespace }}"
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      stringData:
+        type: git
+        url: "{{ argocd_repo_url }}"
+        username: "{{ argocd_repo_username }}"
+        password: "{{ lookup('ansible.builtin.env', 'ARGOCD_REPO_TOKEN') }}"
+  vars:
+    ansible_python_interpreter: "{{ argocd_python_venv }}/bin/python"
+  no_log: true
+
 - name: Ensure Python virtual environment support is installed
   ansible.builtin.apt:
     name: python3-venv
@@ -34,6 +62,46 @@
     virtualenv: "{{ argocd_python_venv }}"
     virtualenv_command: "/usr/bin/python3 -m venv"
     state: present
+
+- name: Ensure Bank of Olim namespace exists
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ argocd_kubeconfig }}"
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ bank_of_olim_namespace }}"
+  vars:
+    ansible_python_interpreter: "{{ argocd_python_venv }}/bin/python"
+
+- name: Configure GHCR pull credentials
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: "{{ argocd_kubeconfig }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ ghcr_pull_secret_name }}"
+        namespace: "{{ bank_of_olim_namespace }}"
+      type: kubernetes.io/dockerconfigjson
+      stringData:
+        .dockerconfigjson: >-
+          {{
+            {
+              'auths': {
+                ghcr_registry: {
+                  'username': ghcr_username,
+                  'password': lookup('ansible.builtin.env', 'GHCR_TOKEN'),
+                  'auth': (ghcr_username ~ ':' ~ lookup('ansible.builtin.env', 'GHCR_TOKEN')) | b64encode
+                }
+              }
+            } | to_json
+          }}
+  vars:
+    ansible_python_interpreter: "{{ argocd_python_venv }}/bin/python"
+  no_log: true
 
 - name: Apply Argo CD bootstrap manifests
   kubernetes.core.k8s:

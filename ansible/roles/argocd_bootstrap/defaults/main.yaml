@@ -9,3 +9,11 @@ argocd_chart_version: "10.9.1"
 argocd_kubeconfig: /etc/kubernetes/admin.conf
 argocd_helm_binary: /usr/local/bin/helm
 argocd_python_venv: /opt/ansible-k8s
+argocd_repo_url: https://github.com/alim7007/bank-of-olim-infra.git
+argocd_repo_username: alim7007
+
+bank_of_olim_namespace: bank-of-olim
+
+ghcr_registry: ghcr.io
+ghcr_username: alim7007
+ghcr_pull_secret_name: ghcr-pull-secret
