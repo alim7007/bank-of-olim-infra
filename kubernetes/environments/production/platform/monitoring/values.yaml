@@ -41,3 +41,16 @@ chunksCache:
 
 resultsCache:
   enabled: false
+
+grafana:
+  enabled: true
+
+  defaultDashboardsEnabled: true
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.local
+    path: /
+    pathType: Prefix
