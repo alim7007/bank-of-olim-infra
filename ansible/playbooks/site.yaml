@@ -1,0 +1,28 @@
+---
+- name: Bootstrap Kubernetes nodes
+  hosts: kube_control_plane:kube_node
+  gather_facts: false
+
+  vars:
+    ansible_user: root
+    ansible_become: false
+
+  roles:
+    - bootstrap
+
+- name: Deploy Kubernetes with Kubespray
+  ansible.builtin.import_playbook: ../vendor/kubespray/cluster.yml
+
+- name: Bootstrap Argo CD
+  hosts: kube_control_plane
+  gather_facts: false
+  become: true
+  tags:
+    - argocd
+
+  tasks:
+    - name: Install Argo CD on first control plane
+      ansible.builtin.include_role:
+        name: argocd_bootstrap
+      run_once: true
+  

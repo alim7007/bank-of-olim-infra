@@ -1,0 +1,4 @@
+bootstrap_user: ansible
+bootstrap_user_shell: /bin/bash
+bootstrap_user_groups:
+  - sudo

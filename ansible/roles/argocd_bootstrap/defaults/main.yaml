@@ -1,0 +1,11 @@
+---
+argocd_release_name: argocd
+argocd_namespace: argocd
+
+argocd_helm_repo_name: argo
+argocd_helm_repo_url: https://argoproj.github.io/argo-helm
+argocd_chart_version: "10.9.1"
+
+argocd_kubeconfig: /etc/kubernetes/admin.conf
+argocd_helm_binary: /usr/local/bin/helm
+argocd_python_venv: /opt/ansible-k8s

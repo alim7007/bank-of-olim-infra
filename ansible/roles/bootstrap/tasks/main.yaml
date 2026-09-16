@@ -1,0 +1,36 @@
+---
+- name: Ensure Python is installed
+  ansible.builtin.raw: |
+    command -v python3 || (apt-get update && apt-get install -y python3)
+  changed_when: false
+
+- name: Create Ansible user
+  ansible.builtin.user:
+    name: "{{ bootstrap_user }}"
+    shell: "{{ bootstrap_user_shell }}"
+    groups: "{{ bootstrap_user_groups }}"
+    append: true
+    create_home: true
+
+- name: Create SSH directory
+  ansible.builtin.file:
+    path: "/home/{{ bootstrap_user }}/.ssh"
+    state: directory
+    owner: "{{ bootstrap_user }}"
+    group: "{{ bootstrap_user }}"
+    mode: "0700"
+
+- name: Install automation public key
+  ansible.builtin.authorized_key:
+    user: "{{ bootstrap_user }}"
+    key: "{{ lookup('ansible.builtin.file', playbook_dir + '/../../terraform/keys/production/automation.pub') }}"
+    state: present
+
+- name: Allow Ansible user passwordless sudo
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ bootstrap_user }}"
+    content: "{{ bootstrap_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "/usr/sbin/visudo -cf %s"

@@ -1,0 +1,47 @@
+---
+- name: Add Argo CD Helm repository
+  kubernetes.core.helm_repository:
+    name: "{{ argocd_helm_repo_name }}"
+    repo_url: "{{ argocd_helm_repo_url }}"
+    binary_path: "{{ argocd_helm_binary }}"
+
+- name: Install Argo CD
+  kubernetes.core.helm:
+    name: "{{ argocd_release_name }}"
+    chart_ref: "{{ argocd_helm_repo_name }}/argo-cd"
+    chart_version: "{{ argocd_chart_version }}"
+    release_namespace: "{{ argocd_namespace }}"
+    create_namespace: true
+    kubeconfig: "{{ argocd_kubeconfig }}"
+    binary_path: "{{ argocd_helm_binary }}"
+    update_repo_cache: true
+    wait: true
+    timeout: 10m0s
+    state: present
+
+- name: Ensure Python virtual environment support is installed
+  ansible.builtin.apt:
+    name: python3-venv
+    state: present
+    update_cache: true
+
+- name: Install Kubernetes Python client dependencies
+  ansible.builtin.pip:
+    name:
+      - "kubernetes>=24.2.0"
+      - "PyYAML>=3.11"
+      - jsonpatch
+    virtualenv: "{{ argocd_python_venv }}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+    state: present
+
+- name: Apply Argo CD bootstrap manifests
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('ansible.builtin.file', item) | from_yaml }}"
+    kubeconfig: "{{ argocd_kubeconfig }}"
+  loop:
+    - "{{ role_path }}/../../../kubernetes/environments/production/argocd/project.yaml"
+    - "{{ role_path }}/../../../kubernetes/environments/production/argocd/root/application.yaml"
+  vars:
+    ansible_python_interpreter: "{{ argocd_python_venv }}/bin/python"
