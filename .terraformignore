@@ -1,0 +1,17 @@
+# Ignore everything first
+*
+
+# Keep Terraform configuration
+!terraform/
+!terraform/**
+
+# Keep this file
+!.terraformignore
+
+# But still exclude Terraform local/generated files
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+crash.log
+crash.*.log
