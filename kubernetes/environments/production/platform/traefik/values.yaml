@@ -12,6 +12,9 @@ providers:
   kubernetesIngress:
     enabled: true
 
+    publishedService:
+      enabled: false
+
 gateway:
   enabled: false
 
@@ -33,9 +36,8 @@ ports:
       default: true
     exposedPort: 443
 
-logs:
-  general:
-    level: INFO
+log:
+  level: INFO
 
 accessLog:
   enabled: true
