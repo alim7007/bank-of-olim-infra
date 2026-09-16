@@ -58,3 +58,6 @@ ingress:
   tls:
     enabled: true
     clusterIssuer: letsencrypt-production
+
+storage:
+  className: local-path
