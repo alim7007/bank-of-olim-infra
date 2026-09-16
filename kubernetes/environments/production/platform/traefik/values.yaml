@@ -1,0 +1,45 @@
+deployment:
+  kind: DaemonSet
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+providers:
+  kubernetesCRD:
+    enabled: true
+
+  kubernetesIngress:
+    enabled: true
+
+gateway:
+  enabled: false
+
+service:
+  enabled: false
+
+ports:
+  web:
+    port: 8000
+    hostPort: 80
+    expose:
+      default: true
+    exposedPort: 80
+
+  websecure:
+    port: 8443
+    hostPort: 443
+    expose:
+      default: true
+    exposedPort: 443
+
+logs:
+  general:
+    level: INFO
+
+accessLog:
+  enabled: true
+
+metrics:
+  prometheus:
+    enabled: true

@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: frontend
+
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: frontend
+
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: VERSION
+              value: {{ .Chart.AppVersion | quote }}
+
+            - name: PORT
+              value: "8080"
+
+            - name: ENABLE_TRACING
+              value: {{ .Values.config.enableTracing | quote }}
+
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+
+            - name: DEFAULT_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: demo-data-config
+                  key: DEMO_LOGIN_USERNAME
+
+            - name: DEFAULT_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: demo-data-config
+                  key: DEMO_LOGIN_PASSWORD
+
+          envFrom:
+            - configMapRef:
+                name: environment-config
+
+            - configMapRef:
+                name: service-api-config
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+
+            initialDelaySeconds: 60
+            periodSeconds: 15
+
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+            - name: publickey
+              mountPath: /tmp/.ssh
+              readOnly: true
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+        - name: publickey
+          secret:
+            secretName: {{ .Values.secrets.jwt }}
+
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: frontend
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: frontend
+
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

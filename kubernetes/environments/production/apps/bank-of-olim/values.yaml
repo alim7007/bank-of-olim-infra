@@ -1,0 +1,57 @@
+global:
+  environment: production
+
+config:
+  enableTracing: "false"
+  enableMetrics: "true"
+  logLevel: "info"
+  useDemoData: "False"
+
+frontend:
+  image:
+    repository: REPLACE_ME/frontend
+    tag: REPLACE_ME
+
+userservice:
+  image:
+    repository: REPLACE_ME/userservice
+    tag: REPLACE_ME
+
+contacts:
+  image:
+    repository: REPLACE_ME/contacts
+    tag: REPLACE_ME
+
+ledgerwriter:
+  image:
+    repository: REPLACE_ME/ledgerwriter
+    tag: REPLACE_ME
+
+balancereader:
+  image:
+    repository: REPLACE_ME/balancereader
+    tag: REPLACE_ME
+
+transactionhistory:
+  image:
+    repository: REPLACE_ME/transactionhistory
+    tag: REPLACE_ME
+
+accountsDb:
+  image:
+    repository: REPLACE_ME/accounts-db
+    tag: REPLACE_ME
+
+ledgerDb:
+  image:
+    repository: REPLACE_ME/ledger-db
+    tag: REPLACE_ME
+
+ingress:
+  enabled: false
+
+  host: REPLACE_ME_DOMAIN
+
+  tls:
+    enabled: true
+    clusterIssuer: letsencrypt-production

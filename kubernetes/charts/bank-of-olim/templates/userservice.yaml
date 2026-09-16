@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: userservice
+
+spec:
+  replicas: {{ .Values.userservice.replicas }}
+
+  selector:
+    matchLabels:
+      app: userservice
+
+  template:
+    metadata:
+      labels:
+        app: userservice
+
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: userservice
+
+          image: "{{ .Values.userservice.image.repository }}:{{ .Values.userservice.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: VERSION
+              value: {{ .Chart.AppVersion | quote }}
+
+            - name: PORT
+              value: "8080"
+
+            - name: ENABLE_TRACING
+              value: {{ .Values.config.enableTracing | quote }}
+
+            - name: TOKEN_EXPIRY_SECONDS
+              value: "3600"
+
+            - name: PRIV_KEY_PATH
+              value: "/tmp/.ssh/privatekey"
+
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+
+          envFrom:
+            - configMapRef:
+                name: environment-config
+
+            - secretRef:
+                name: {{ .Values.secrets.accountsDb }}
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          resources:
+            {{- toYaml .Values.userservice.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+            - name: keys
+              mountPath: /tmp/.ssh
+              readOnly: true
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+        - name: keys
+          secret:
+            secretName: {{ .Values.secrets.jwt }}
+
+            items:
+              - key: jwtRS256.key
+                path: privatekey
+
+              - key: jwtRS256.key.pub
+                path: publickey
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: userservice
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: userservice
+
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

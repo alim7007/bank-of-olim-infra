@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: transactionhistory
+
+spec:
+  replicas: {{ .Values.transactionhistory.replicas }}
+
+  selector:
+    matchLabels:
+      app: transactionhistory
+
+  template:
+    metadata:
+      labels:
+        app: transactionhistory
+
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+
+      containers:
+        - name: transactionhistory
+
+          image: "{{ .Values.transactionhistory.image.repository }}:{{ .Values.transactionhistory.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: VERSION
+              value: {{ .Chart.AppVersion | quote }}
+
+            - name: PORT
+              value: "8080"
+
+            - name: ENABLE_TRACING
+              value: {{ .Values.config.enableTracing | quote }}
+
+            - name: ENABLE_METRICS
+              value: {{ .Values.config.enableMetrics | quote }}
+
+            - name: POLL_MS
+              value: "100"
+
+            - name: CACHE_SIZE
+              value: "1000"
+
+            - name: CACHE_MINUTES
+              value: "60"
+
+            - name: HISTORY_LIMIT
+              value: "100"
+
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          envFrom:
+            - configMapRef:
+                name: environment-config
+
+            - secretRef:
+                name: {{ .Values.secrets.ledgerDb }}
+
+          startupProbe:
+            httpGet:
+              path: /healthy
+              port: 8080
+
+            failureThreshold: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+
+            initialDelaySeconds: 60
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 8080
+
+            initialDelaySeconds: 120
+            periodSeconds: 5
+
+          resources:
+            {{- toYaml .Values.transactionhistory.resources | nindent 12 }}
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: transactionhistory
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: transactionhistory
+
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

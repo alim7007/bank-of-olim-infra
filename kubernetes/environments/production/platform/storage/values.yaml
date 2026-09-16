@@ -1,0 +1,18 @@
+storageClass:
+  create: true
+  defaultClass: true
+  name: local-path
+  defaultVolumeType: local
+  reclaimPolicy: Retain
+
+nodePathMap:
+  - node: worker01
+    paths:
+      - /var/lib/bank-of-olim
+
+  - node: worker02
+    paths:
+      - /var/lib/bank-of-olim
+
+  - node: cp01
+    paths: []

@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: accounts-db
+
+spec:
+  clusterIP: None
+
+  selector:
+    app: accounts-db
+
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+
+metadata:
+  name: accounts-db
+
+spec:
+  serviceName: accounts-db
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: accounts-db
+
+  template:
+    metadata:
+      labels:
+        app: accounts-db
+
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
+
+      containers:
+        - name: accounts-db
+
+          image: "{{ .Values.accountsDb.image.repository }}:{{ .Values.accountsDb.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+          ports:
+            - containerPort: 5432
+
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secrets.accountsDb }}
+
+            - configMapRef:
+                name: demo-data-config
+
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          resources:
+            {{- toYaml .Values.accountsDb.resources | nindent 12 }}
+
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        storageClassName: {{ .Values.storage.className }}
+
+        resources:
+          requests:
+            storage: {{ .Values.accountsDb.storage.size }}

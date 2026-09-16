@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "global",
+    "frontend",
+    "userservice",
+    "contacts",
+    "ledgerwriter",
+    "balancereader",
+    "transactionhistory"
+  ],
+  "properties": {
+    "global": {
+      "type": "object",
+      "required": ["environment"],
+      "properties": {
+        "environment": {
+          "type": "string"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "host": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+apiVersion: v2
+
+name: bank-of-olim
+
+description: Helm chart for the Bank of Olim application
+
+type: application
+
+version: 0.1.0
+
+appVersion: "0.1.0"
