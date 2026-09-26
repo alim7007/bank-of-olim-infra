@@ -13,42 +13,42 @@ config:
 frontend:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-frontend
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 userservice:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-userservice
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 contacts:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-contacts
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 ledgerwriter:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-ledgerwriter
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 balancereader:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-balancereader
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 transactionhistory:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-transactionhistory
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 accountsDb:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-accounts-db
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 ledgerDb:
   image:
     repository: ghcr.io/alim7007/bank-of-olim-ledger-db
-    tag: c106ced0ba5869bb1299bdf638d4bf8120fe5953
+    tag: 805e6fd480d8a0086d28a580076bd646fad0b125
 
 ingress:
   enabled: true
