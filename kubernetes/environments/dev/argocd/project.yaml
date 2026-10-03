@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+
+metadata:
+  name: bank-of-olim
+  namespace: argocd
+
+spec:
+  description: Bank of Olim dev platform
+
+  sourceRepos:
+    - https://github.com/alim7007/bank-of-olim-infra.git
+    - https://argoproj.github.io/argo-helm
+    - https://traefik.github.io/charts
+    - https://charts.jetstack.io
+    - https://kubernetes-sigs.github.io/metrics-server/
+    - https://prometheus-community.github.io/helm-charts
+    - https://github.com/digitalocean/csi-digitalocean.git
+
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

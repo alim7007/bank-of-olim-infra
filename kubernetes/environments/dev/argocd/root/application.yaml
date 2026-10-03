@@ -1,0 +1,20 @@
+# kubernetes/environments/dev/argocd/root/application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: bank-of-olim
+  source:
+    repoURL: https://github.com/alim7007/bank-of-olim-infra.git
+    targetRevision: dev
+    path: kubernetes/environments/dev/argocd/applications
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

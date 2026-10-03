@@ -1,9 +1,39 @@
 name: Infrastructure CI
 
 on:
+  pull_request:
+    branches:
+      - dev
+      - main
+  push:
+    branches:
+      - dev
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  promotion-guard:
+    name: Promotion guard
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Only dev can be merged into main
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" != "dev" ]; then
+            echo "PRs into main are allowed only from dev (got: $HEAD_REF)"
+            exit 1
+          fi
+
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
@@ -35,12 +65,19 @@ jobs:
         run: |
           helm lint kubernetes/charts/bank-of-olim
 
-      - name: Render production chart
+      - name: Render chart for each environment
         run: |
-          helm template bank-of-olim \
-            kubernetes/charts/bank-of-olim \
-            -f kubernetes/environments/production/apps/bank-of-olim/values.yaml \
-            > /dev/null
+          for env in production dev; do
+            values="kubernetes/environments/${env}/apps/bank-of-olim/values.yaml"
+            if [ -f "$values" ]; then
+              echo "Rendering ${env}"
+              helm template bank-of-olim \
+                kubernetes/charts/bank-of-olim \
+                -f "$values" > /dev/null
+            else
+              echo "No values for ${env}, skipping"
+            fi
+          done
 
   ansible:
     name: Ansible
@@ -64,7 +101,12 @@ jobs:
 
           ansible-galaxy collection install kubernetes.core
 
-      - name: Ansible syntax check
+      - name: Syntax check (production)
         working-directory: ansible
         run: |
           ansible-playbook playbooks/site.yaml --syntax-check
+
+      - name: Syntax check (dev)
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/dev/inventory.ini playbooks/site-dev.yaml --syntax-check

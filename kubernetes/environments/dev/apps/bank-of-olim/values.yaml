@@ -1,0 +1,62 @@
+global:
+  environment: dev
+
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+    
+config:
+  enableTracing: "false"
+  enableMetrics: "true"
+  logLevel: "info"
+  useDemoData: "False"
+
+frontend:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-frontend
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+userservice:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-userservice
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+contacts:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-contacts
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+ledgerwriter:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-ledgerwriter
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+balancereader:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-balancereader
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+transactionhistory:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-transactionhistory
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+accountsDb:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-accounts-db
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+ledgerDb:
+  image:
+    repository: ghcr.io/alim7007/bank-of-olim-ledger-db
+    tag: c96beab70bbd9bd5b2079281c0c240ea7eeda9fd
+
+ingress:
+  enabled: true
+  host: bank.local
+
+  tls:
+    enabled: false
+    clusterIssuer: letsencrypt-production
+
+storage:
+  className: local-path

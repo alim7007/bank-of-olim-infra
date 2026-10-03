@@ -1,0 +1,10 @@
+kind: DaemonSet
+
+config:
+  outputs: |
+    [OUTPUT]
+        Name   loki
+        Match  kube.*
+        Host   loki-gateway.logging.svc.cluster.local
+        Port   80
+        Labels job=fluent-bit

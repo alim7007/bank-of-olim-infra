@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: bank-of-olim
+  namespace: argocd
+
+spec:
+  project: bank-of-olim
+
+  sources:
+    - repoURL: https://github.com/alim7007/bank-of-olim-infra.git
+      targetRevision: dev
+      path: kubernetes/charts/bank-of-olim
+
+      helm:
+        releaseName: bank-of-olim
+
+        valueFiles:
+          - $values/kubernetes/environments/dev/apps/bank-of-olim/values.yaml
+
+    - repoURL: https://github.com/alim7007/bank-of-olim-infra.git
+      targetRevision: dev
+      ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bank-of-olim
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true

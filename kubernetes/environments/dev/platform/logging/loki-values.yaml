@@ -1,0 +1,7 @@
+# Logging backend will be selected separately.
+#
+# Candidates:
+# - Loki
+# - VictoriaLogs
+#
+# Fluent Bit will be used as the node log collector.
