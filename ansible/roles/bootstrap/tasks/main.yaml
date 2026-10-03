@@ -23,7 +23,7 @@
 - name: Install automation public key
   ansible.builtin.authorized_key:
     user: "{{ bootstrap_user }}"
-    key: "{{ lookup('ansible.builtin.file', playbook_dir + '/../../terraform/keys/production/automation.pub') }}"
+    key: "{{ lookup('ansible.builtin.file', bootstrap_public_key_file) }}"
     state: present
 
 - name: Allow Ansible user passwordless sudo

@@ -1,0 +1,35 @@
+---
+- name: Bootstrap nodes
+  hosts: k3s_cluster
+  gather_facts: false
+  vars:
+    ansible_user: "{{ lookup('ansible.builtin.env', 'USER') }}"
+    ansible_ssh_private_key_file: ~/.orbstack/ssh/id_ed25519
+    ansible_become: true
+  roles:
+    - bootstrap
+
+- name: Install k3s server
+  hosts: k3s_server
+  tasks:
+    - ansible.builtin.include_role:
+        name: k3s
+        tasks_from: server
+
+- name: Install k3s agents
+  hosts: k3s_agent
+  tasks:
+    - ansible.builtin.include_role:
+        name: k3s
+        tasks_from: agent
+
+- name: Bootstrap Argo CD
+  hosts: k3s_server
+  gather_facts: false
+  become: true
+  tags:
+    - argocd
+  tasks:
+    - ansible.builtin.include_role:
+        name: argocd_bootstrap
+      run_once: true

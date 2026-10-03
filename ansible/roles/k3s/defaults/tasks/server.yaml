@@ -1,0 +1,46 @@
+---
+- name: Download k3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: "{{ k3s_install_script }}"
+    mode: "0755"
+
+- name: Install k3s server
+  ansible.builtin.command:
+    argv:
+      - "{{ k3s_install_script }}"
+      - server
+      - --disable=traefik
+      - --disable=servicelb
+      - --disable=local-storage
+      - --disable=metrics-server
+      - --node-ip={{ ip }}
+      - --tls-san={{ ip }}
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_CHANNEL: "{{ k3s_channel }}"
+
+- name: Wait for node token
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+
+- name: Read node token
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_node_token
+  no_log: true
+
+- name: Save node token as fact
+  ansible.builtin.set_fact:
+    k3s_token: "{{ k3s_node_token.content | b64decode | trim }}"
+  no_log: true
+
+- name: Install Helm
+  ansible.builtin.unarchive:
+    src: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch }}.tar.gz"
+    dest: /usr/local/bin
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+      - "linux-{{ helm_arch }}/helm"
+    creates: /usr/local/bin/helm

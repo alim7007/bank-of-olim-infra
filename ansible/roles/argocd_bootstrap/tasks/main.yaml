@@ -109,7 +109,7 @@
     definition: "{{ lookup('ansible.builtin.file', item) | from_yaml }}"
     kubeconfig: "{{ argocd_kubeconfig }}"
   loop:
-    - "{{ role_path }}/../../../kubernetes/environments/production/argocd/project.yaml"
-    - "{{ role_path }}/../../../kubernetes/environments/production/argocd/root/application.yaml"
+    - "{{ role_path }}/../../../kubernetes/environments/{{ argocd_environment }}/argocd/project.yaml"
+    - "{{ role_path }}/../../../kubernetes/environments/{{ argocd_environment }}/argocd/root/application.yaml"
   vars:
     ansible_python_interpreter: "{{ argocd_python_venv }}/bin/python"

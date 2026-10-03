@@ -1,0 +1,4 @@
+k3s_channel: stable
+k3s_install_script: /usr/local/bin/k3s-install.sh
+helm_version: v3.16.4
+helm_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
